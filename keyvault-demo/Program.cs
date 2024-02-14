@@ -19,16 +19,18 @@ if (app.Environment.IsDevelopment() || app.Environment.IsProduction() || app.Env
 
     //Setup KeyVault Configuration
 
-    var KeyVaultUri = builder.Configuration["KeyVaultUri"];
+    var KeyVaultUri = builder.Configuration.GetSection("AzureConfiguration:KeyVaultUri").Value;
+    var ManagedIdentityClientId = builder.Configuration.GetSection("AzureConfiguration:ManagedIdentityClientId").Value;
 
-    if (string.IsNullOrWhiteSpace(KeyVaultUri))
+    if (string.IsNullOrWhiteSpace(KeyVaultUri) || string.IsNullOrWhiteSpace(ManagedIdentityClientId))
     {
         throw new ArgumentException("No valid Key Vault Uri configured");
     }
 
     builder.Configuration.AddAzureKeyVault(
     new Uri(KeyVaultUri),
-    new DefaultAzureCredential()
+    new DefaultAzureCredential(
+        new DefaultAzureCredentialOptions { ManagedIdentityClientId = ManagedIdentityClientId })
     //new AzureKeyVaultConfigurationOptions()
     //{
     //    ReloadInterval = TimeSpan.FromSeconds(20),
